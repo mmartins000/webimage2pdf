@@ -80,11 +80,19 @@ def download_images_from_list(image_list, destination_folder):
 
 
 def append_pdf(image_list, destination_folder):
-    extension = str(image_list[0]).rsplit('.', 1)[1]
-
     with open(destination_folder + ".pdf", "wb") as f:
         os.chdir(destination_folder)
-        f.write(img2pdf.convert([i for i in image_list if i.endswith(extension)]))
+        try:
+            f.write(img2pdf.convert([i for i in image_list]))
+        except Exception as e:
+            if str(e).startswith("Refusing"):
+                print("Error: the module img2pdf cannot work with images with alpha channels.")
+                print("Probably one of the images is a PNG with alpha channel.")
+                print("On macOS, use Preview Inspector (Cmd+I) to find if an image has an alpha channel.")
+                print("Also, Preview can remove the alpha channel and save the image under another filename.")
+                print("You can also use Preview to export the image to JPEG.")
+                print("On Linux, 'convert' from ImageMagick may be used to remove the alpha channel.")
+                exit(2)
     args.quiet or print("Done. PDF generated as file " + destination_folder + ".pdf")
 
 
